@@ -15,7 +15,7 @@ This java application tests mongoDB performance, such as latency and throughput,
 
 
 1. Open a terminal
-2. Clone the project: `git clone https://github.com/kagahd/mongodb-performance-test.git`
+2. Clone the project: `git clone https://github.com/idealo/mongodb-performance-test.git`
 3. Cd to the project folder: `cd mongodb-performance-test`
 4. Execute the jar file either by:
 ```
