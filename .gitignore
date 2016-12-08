@@ -3,3 +3,4 @@ target/
 *.csv
 *.log
 .~lock*
+.git*

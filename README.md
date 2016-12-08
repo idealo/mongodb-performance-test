@@ -7,11 +7,11 @@ This java application tests mongoDB performance, such as latency and throughput,
 ## Start
 
 
-### Preconditions:
+### Preconditions
 
 1. java 1.8 or newer
 
-### Run:
+### Run
 
 
 1. Open a terminal
