@@ -37,6 +37,7 @@ public class Main {
     long maxDurationInSeconds = DEFAULT_MAX_DURATION_IN_SECONDS;
     boolean dropDb = false;
     private final String version;
+    private int randomFieldLength = 0;
 
     public Main(){
         version = getClass().getPackage().getImplementationVersion();
@@ -153,6 +154,14 @@ public class Main {
                 dropDb = true;
             }
 
+            if (cmdLine.hasOption("s")) {
+                final String s_arg = cmdLine.getOptionValue("s");
+                randomFieldLength = Integer.valueOf(s_arg);
+                if (randomFieldLength < 0) {
+                    throw new IllegalArgumentException("Size of random text field must be >= 0!");
+                }
+            }
+
 
 
         } catch (Exception e) {
@@ -181,6 +190,7 @@ public class Main {
                             "\n     " + IOperation.THREAD_ID + ": number of the thread inserting the document, starting from 1" +
                             "\n     " + IOperation.THREAD_RUN_COUNT + ": number of inserts being executed by this thread, starting from 1" +
                             "\n     " + IOperation.RANDOM_LONG + ": a random long number" +
+                            "\n     " + IOperation.RANDOM_TEXT + ": a random text, size defined by user (default 0, thus absent)" +
                             "\n     " + IOperation.VERSION + ": version number of the document, starting from 1" +
                             "\n  " + OperationModes.UPDATE_ONE.name() + " updates one document randomly queried on field '" + IOperation.ID + "'" +
                                  " by incrementing the field '"+IOperation.VERSION + "' and updating the field '"+IOperation.RANDOM_LONG+"' to a random value." +
@@ -236,6 +246,9 @@ public class Main {
                         .desc("maximum duration in seconds of the performance test for each set of modes (default " + DEFAULT_MAX_DURATION_IN_SECONDS + ")")
                         .type(Number.class).build())
                 .addOption(new Option("dropdb", "dropdatabase", false, "drop database before inserting documents"))
+                .addOption(Option.builder("s").longOpt("randomtextsize").hasArg().argName("RANDOM_TEXT_SIZE")
+                        .desc("Size of random text field, absent if 0 (default 0)")
+                        .type(Number.class).build())
                 .addOption(Option.builder("h").longOpt("host").hasArg().argName("HOST").desc("mongoDB host (default " + DEFAULT_HOST + ")").build())
                 .addOption(Option.builder("port").longOpt("port").hasArg().argName("PORT").desc("mongoDB port (default " + DEFAULT_PORT + ")").type(Number.class)
                         .build())
@@ -284,12 +297,16 @@ public class Main {
                 } else if (mode.equals(OperationModes.DELETE_MANY.name())) {
                     operation = new DeleteOperation(mongoDbAccessor, database, collection, IOperation.THREAD_RUN_COUNT);
                 } else {
-                    operation = new InsertOperation(mongoDbAccessor, database, collection, IOperation.ID);
+                    InsertOperation insertOperation = new InsertOperation(mongoDbAccessor, database, collection, IOperation.ID);
                     if (dropDb) {
                         LOG.info("drop database '{}'", database);
                         mongoDbAccessor.getMongoDatabase(database).drop();
                         LOG.info("database '{}' dropped", database);
                     }
+                    if(randomFieldLength > 0){
+                        insertOperation.setRandomFieldLength(randomFieldLength);
+                    }
+                    operation = insertOperation;
                 }
 
                 OperationExecutor operationExecutor = new OperationExecutor(threadCount, operationsCount, maxDurationInSeconds, operation, runModeLatch);

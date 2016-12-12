@@ -27,9 +27,9 @@ java -cp ./latest-version/mongodb-performance-test.jar de.idealo.mongodb.perf.Ma
 ```
 This will print a description how to use the program:
 ```
-usage: de.idealo.mongodb.perf.Main [-H] [-v] [-m <MODE>] [-o <OPERATIONS_COUNT>] [-t <THREADS>] [-d <DURATION>] [-dropdb] [-h <HOST>] [-port <PORT>] [-db <DB>]
-       [-c <COLLECTION>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>]
-*** mongoDB performance test (version 1.0.4)***
+usage: de.idealo.mongodb.perf.Main [-H] [-v] [-m <MODE>] [-o <OPERATIONS_COUNT>] [-t <THREADS>] [-d <DURATION>] [-dropdb] [-s <RANDOM_TEXT_SIZE>] [-h <HOST>]
+       [-port <PORT>] [-db <DB>] [-c <COLLECTION>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>]
+*** mongoDB performance test (version 1.0.5)***
 Please run first mode=INSERT in order to have a non-empty collection to test on.
 You may add option 'dropdb' in order to drop the database before inserting documents.
 Documents are inserted one by one (no bulk insert).
@@ -41,6 +41,7 @@ mode=DELETE_MANY or a whole set of modes simultaneously.
      threadId: number of the thread inserting the document, starting from 1
      threadRunCount: number of inserts being executed by this thread, starting from 1
      rnd: a random long number
+     rndTxt: a random text, size defined by user (default 0, thus absent)
      v: version number of the document, starting from 1
   UPDATE_ONE updates one document randomly queried on field '_id' by incrementing the field 'v' and updating the field 'rnd' to a random value.
   UPDATE_MANY updates all documents randomly queried on field 'threadRunCount' by incrementing the field 'v' and updating the field 'rnd' to a random value.
@@ -71,6 +72,7 @@ Options:
                                            their corresponding number of threads as soon as all modes of the current run are terminated.
  -d,--duration <DURATION>                  maximum duration in seconds of the performance test for each set of modes (default 3600)
  -dropdb,--dropdatabase                    drop database before inserting documents
+ -s,--randomtextsize <RANDOM_TEXT_SIZE>    Size of random text field, absent if 0 (default 0)
  -h,--host <HOST>                          mongoDB host (default localhost)
  -port,--port <PORT>                       mongoDB port (default 27017)
  -db,--database <DB>                       mongoDB database on which the performance test is executed
@@ -166,6 +168,7 @@ The inserted documents have the following fields:
 * `threadId`: number of the thread inserting the document, starting from 1
 * `threadRunCount`: number of inserts being executed by this thread, starting from 1
 * `rnd`: a random long number
+* `rndTxt`: a random text, size defined by parameter -s (default 0, thus absent)
 * `v`: version number of the document, starting from 1
 
 ### Operations "...ONE" and "...MANY"
@@ -180,6 +183,8 @@ For example, 50 threads inserted a total of 1 million of documents, so the range
 
 ## Version history
 
+* v1.0.5
+    + new: option to add random text of user defined length to documents to insert
 * v1.0.4
     + new: initial commit
 

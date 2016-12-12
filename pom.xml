@@ -6,7 +6,7 @@
 
     <groupId>de.idealo.mongodb</groupId>
     <artifactId>mongodb-performance-test</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <name>mongodb-performance-test</name>
     <url>http://maven.apache.org</url>

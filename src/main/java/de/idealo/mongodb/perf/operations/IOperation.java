@@ -22,5 +22,6 @@ public interface IOperation {
     String THREAD_RUN_COUNT = "threadRunCount";
     String GLOBAL_RUN_COUNT = "globbalRunCount";
     String RANDOM_LONG = "rnd";
+    String RANDOM_TEXT = "rndTxt";
     String VERSION = "v";
 }
