@@ -96,28 +96,33 @@ If the database uses authentication, you'll need furthermore:
 
 ### Some examples
 
+To make the following commands shorter, use the following variable:
+```
+jarfile=./latest-version/mongodb-performance-test.jar
+```
+
 #### Insert test
 To insert 1 million documents on localhost:27017 (default) by 10 threads into database `test`, collection `perf` would be: 
 ```
-java -jar ./latest-version/mongodb-performance-test.jar -m insert -o 1000000 -t 10 -db test -c perf
+java -jar $jarfile -m insert -o 1000000 -t 10 -db test -c perf
 ```
 
 #### Update-one test
 To test the performance of updating one document per query using 10, 20 and finally 30 threads for 1 hour each run (3 hours in total) would be: 
 ```
-java -jar ./latest-version/mongodb-performance-test.jar -m update_one -d 3600 -t 10 20 30 -db test -c perf
+java -jar $jarfile -m update_one -d 3600 -t 10 20 30 -db test -c perf
 ```
 
 #### Balanced update/find test (1/1)
 To test the performance of both updating one document per query and simultaneously iterating many documents per query using the same number of threads for both operation modes i.e. 10, 20 and finally 30 threads for 1 hour each run (3 hours in total) would be: 
 ```
-java -jar ./latest-version/mongodb-performance-test.jar -m update_one iterate_many -d 3600 -t 10 10 20 20 30 30 -db test -c perf
+java -jar $jarfile -m update_one iterate_many -d 3600 -t 10 10 20 20 30 30 -db test -c perf
 ```
 
 #### Unbalanced update/find test (1/2)
 To test the performance of both updating one document per query and simultaneously iterating many documents per query using half number of threads for updates as for reads i.e. 10, 20 and 30 threads for updates compared to 20, 40 and finally 60 threads for reads, for 1 hour each run (3 hours in total) would be: 
 ```
-java -jar ./latest-version/mongodb-performance-test.jar -m update_one iterate_many -d 3600 -t 10 20 20 40 30 60 -db test -c perf
+java -jar $jarfile -m update_one iterate_many -d 3600 -t 10 20 20 40 30 60 -db test -c perf
 ```
 
 
