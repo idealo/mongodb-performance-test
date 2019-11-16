@@ -72,7 +72,7 @@ Options:
                                            their corresponding number of threads as soon as all modes of the current run are terminated.
  -d,--duration <DURATION>                  maximum duration in seconds of the performance test for each set of modes (default 3600)
  -dropdb,--dropdatabase                    drop database before inserting documents
- -s,--randomtextsize <RANDOM_TEXT_SIZE>    Size of random text field, absent if 0 (default 0)
+ -s,--randomtextsize <RANDOM_TEXT_SIZE>    Size in bytes of random text field, absent if 0 (default 0)
  -h,--host <HOST>                          mongoDB host (default localhost)
  -port,--port <PORT>                       mongoDB port (default 27017)
  -db,--database <DB>                       mongoDB database on which the performance test is executed
@@ -80,6 +80,7 @@ Options:
  -u,--user <USER>                          mongoDB user
  -p,--password <PASSWORD>                  mongoDB password
  -adb,--authdb <AUTH_DB>                   mongoDB database to be authenticated against (default: value of parameter -db)
+ -ssl,--ssl                                use SSL to connect to mongoDB (default: false)
 ```
 
 Required parameters are at least:
@@ -188,6 +189,8 @@ For example, 50 threads inserted a total of 1 million of documents, so the range
 
 ## Version history
 
+* v1.1.0
+    + new: new option to connect via ssl
 * v1.0.5
     + new: option to add random text of user defined length to documents to insert
 * v1.0.4

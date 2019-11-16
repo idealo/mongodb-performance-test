@@ -211,10 +211,10 @@ public class OperationExecutor implements Runnable {
 
     public static void main(String[] args) throws InterruptedException {
 
-        ServerAddress serverAddress = new ServerAddress("mongo-049.db00.pro05.eu.idealo.com:27017");
-        MongoDbAccessor mongoDbAccessor = new MongoDbAccessor("admin", "mdbpw4US", "admin", serverAddress);
-        InsertOperation insertOperation = new InsertOperation(mongoDbAccessor, "test", "perf9", IOperation.ID);
-        OperationExecutor operationExecutor = new OperationExecutor(10, 10000, 3600, insertOperation, new CountDownLatch(1));
+        ServerAddress serverAddress = new ServerAddress("test-db:27017");
+        MongoDbAccessor mongoDbAccessor = new MongoDbAccessor("user", "pw", "testdb", true, serverAddress);
+        InsertOperation insertOperation = new InsertOperation(mongoDbAccessor, "testdb", "perf", IOperation.ID);
+        OperationExecutor operationExecutor = new OperationExecutor(10, 1000000, 3600, insertOperation, new CountDownLatch(1));
         operationExecutor.executeThreads();
         operationExecutor.analysis();
         operationExecutor.stopReporters();

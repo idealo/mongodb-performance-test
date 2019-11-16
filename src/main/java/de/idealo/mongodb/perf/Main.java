@@ -31,6 +31,7 @@ public class Main {
     String user = null;
     String password = null;
     String authDb = null;
+    boolean ssl = false;
     ArrayList<String> modes = new ArrayList<String>();
     ArrayList<Long> operationsCounts = new ArrayList<Long>();
     ArrayList<Integer> threadCounts = new ArrayList<Integer>();
@@ -147,6 +148,9 @@ public class Main {
             user = cmdLine.getOptionValue("u");
             password = cmdLine.getOptionValue("p");
             authDb = cmdLine.getOptionValue("adb");
+            if (cmdLine.hasOption("ssl")) {
+                ssl = true;
+            }
             if(authDb==null || authDb.isEmpty()){
                 authDb=database;
             }
@@ -247,7 +251,7 @@ public class Main {
                         .type(Number.class).build())
                 .addOption(new Option("dropdb", "dropdatabase", false, "drop database before inserting documents"))
                 .addOption(Option.builder("s").longOpt("randomtextsize").hasArg().argName("RANDOM_TEXT_SIZE")
-                        .desc("Size of random text field, absent if 0 (default 0)")
+                        .desc("Size in bytes of random text field, absent if 0 (default 0)")
                         .type(Number.class).build())
                 .addOption(Option.builder("h").longOpt("host").hasArg().argName("HOST").desc("mongoDB host (default " + DEFAULT_HOST + ")").build())
                 .addOption(Option.builder("port").longOpt("port").hasArg().argName("PORT").desc("mongoDB port (default " + DEFAULT_PORT + ")").type(Number.class)
@@ -256,14 +260,17 @@ public class Main {
                 .addOption(Option.builder("c").longOpt("collection").hasArg().argName("COLLECTION").desc("mongoDB collection on which the performance test is executed").build())
                 .addOption(Option.builder("u").longOpt("user").hasArg().argName("USER").desc("mongoDB user").build())
                 .addOption(Option.builder("p").longOpt("password").hasArg().argName("PASSWORD").desc("mongoDB password").build())
-                .addOption(Option.builder("adb").longOpt("authdb").hasArg().argName("AUTH_DB").desc("mongoDB database to be authenticated against (default: value of parameter -db)").build());
+                .addOption(Option.builder("adb").longOpt("authdb").hasArg().argName("AUTH_DB").desc("mongoDB database to be authenticated against (default: value of parameter -db)").build())
+                .addOption(new Option("ssl", "ssl", false, "use SSL to connect to mongoDB"))
+        ;
+
         return options;
     }
 
     private void executeOperations() {
 
         final ServerAddress serverAddress = new ServerAddress(host, port);
-        final MongoDbAccessor mongoDbAccessor = new MongoDbAccessor(user, password, authDb, serverAddress);
+        final MongoDbAccessor mongoDbAccessor = new MongoDbAccessor(user, password, authDb, ssl, serverAddress);
 
         int run=0;
         CountDownLatch runModeLatch = new CountDownLatch(modes.size());

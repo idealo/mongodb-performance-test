@@ -23,24 +23,26 @@ public class MongoDbAccessor {
     private final String user;
     private final String pw;
     private final String authDb;
+    private final boolean ssl;
     private MongoClient mongo;
 
 
 
     private MongoDbAccessor(){
-        this(-1, null, null, null, null);
+        this(-1, null, null, null, false, null);
     };
 
-    public MongoDbAccessor(String user, String pw, String authDb, ServerAddress ... serverAddress){
-        this(-1, user, pw, authDb, serverAddress);
+    public MongoDbAccessor(String user, String pw, String authDb, boolean ssl, ServerAddress ... serverAddress){
+        this(-1, user, pw, authDb, ssl, serverAddress);
     }
 
-    public MongoDbAccessor(int socketTimeOut, String user, String pw, String authDb, ServerAddress ... serverAddress){
+    public MongoDbAccessor(int socketTimeOut, String user, String pw, String authDb, boolean ssl, ServerAddress ... serverAddress){
         this.serverAddress = serverAddress;
         this.socketTimeOut = socketTimeOut;
         this.user = user;
         this.pw = pw;
         this.authDb = authDb!=null&&!authDb.isEmpty()?authDb:"admin";
+        this.ssl = ssl;
         init();
     }
 
@@ -59,6 +61,8 @@ public class MongoDbAccessor {
                     connectionsPerHost(5000).
                     threadsAllowedToBlockForConnectionMultiplier(10).
                     writeConcern(WriteConcern.ACKNOWLEDGED).
+                    sslEnabled(ssl).
+                    sslInvalidHostNameAllowed(true).
                     build();
 
             if(user != null && !user.isEmpty() && pw!= null && !pw.isEmpty()) {
@@ -140,7 +144,7 @@ public class MongoDbAccessor {
 
     public static void main(String[] args) throws UnknownHostException {
         ServerAddress adr = new ServerAddress("localhost:27017");
-        MongoDbAccessor monitor = new MongoDbAccessor(null, null, null, adr);
+        MongoDbAccessor monitor = new MongoDbAccessor(null, null, null, false, adr);
         Document doc = monitor.runCommand("admin", new BasicDBObject("isMaster", "1"));
         LOG.info("doc: {}", doc);
         LOG.info("ismaster: {}",  doc.get("ismaster"));
