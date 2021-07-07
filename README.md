@@ -189,8 +189,10 @@ For example, 50 threads inserted a total of 1 million of documents, so the range
 
 ## Version history
 
+* v1.1.2
+  + improvement: replace logback-classic v1.1.3 by v1.2.0 to close a potential security vulnerability
 * v1.1.1
-    + improvement: replace junit v4.12 by v4.13.1 to to close a potential security vulnerability
+    + improvement: replace junit v4.12 by v4.13.1 to close a potential security vulnerability
 * v1.1.0
     + new: new option to connect via ssl
 * v1.0.5
