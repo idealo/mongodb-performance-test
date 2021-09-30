@@ -41,10 +41,11 @@ public class OperationExecutor implements Runnable {
     private final IOperation operation;
     private final File csvFolder;
     private final CountDownLatch runModeLatch;
+    private final CountDownLatch endLatch;
     private final String timerPerSecondName;
     private final String timerPerRunName;
 
-    public OperationExecutor(int threadCount, long opsCount, long maxDurationInSeconds, IOperation operation, CountDownLatch runModeLatch){
+    public OperationExecutor(int threadCount, long opsCount, long maxDurationInSeconds, IOperation operation, CountDownLatch runModeLatch, CountDownLatch endLatch){
         LOG.info(">>> OperationExecutor threadCount: {}, opsCount: {}, maxDurationInSeconds: {}, operation: {}", threadCount, opsCount, maxDurationInSeconds, operation.getClass().getSimpleName());
         this.csvFolder = getJarLocation();
         this.threadCount = threadCount;
@@ -52,6 +53,7 @@ public class OperationExecutor implements Runnable {
         this.maxDurationInSeconds = maxDurationInSeconds;
         this.operation = operation;
         this.runModeLatch = runModeLatch;
+        this.endLatch = endLatch;
         this.timerPerSecondName = TIMER_PER_SECOND_PREFIX + operation.getOperationMode();
         this.timerPerRunName = TIMER_PER_RUN_PREFIX + operation.getOperationMode();
         final MetricRegistry registry = new MetricRegistry();
@@ -133,8 +135,6 @@ public class OperationExecutor implements Runnable {
                                 while((runCounter.get() < opsCount || opsCount==0) && runModeLatch.getCount()>0){//if opsCount==0 then it terminates when maxDurationInSeconds is reached
                                     doOperation(t+1, count++, runCounter.incrementAndGet());
                                 }
-
-
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
                             } finally {
@@ -153,6 +153,8 @@ public class OperationExecutor implements Runnable {
         LOG.info("Done ({}) in {} ms ", notTimedOut ? "in time" : "timed out", durationInMs);
         runModeLatch.countDown();
         endGate.await();//if maxDurationInSeconds was reached, threads are still running by working on connections that will be closed right now, so wait until all threads have stopped to avoid trying to use closed connections, which would throws errors
+        endLatch.countDown();
+        endLatch.await(); // ensure all other operations have completed running their threads
         executor.shutdownNow();
     }
 
@@ -214,7 +216,7 @@ public class OperationExecutor implements Runnable {
         ServerAddress serverAddress = new ServerAddress("test-db:27017");
         MongoDbAccessor mongoDbAccessor = new MongoDbAccessor("user", "pw", "testdb", true, serverAddress);
         InsertOperation insertOperation = new InsertOperation(mongoDbAccessor, "testdb", "perf", IOperation.ID);
-        OperationExecutor operationExecutor = new OperationExecutor(10, 1000000, 3600, insertOperation, new CountDownLatch(1));
+        OperationExecutor operationExecutor = new OperationExecutor(10, 1000000, 3600, insertOperation, new CountDownLatch(1), new CountDownLatch(1));
         operationExecutor.executeThreads();
         operationExecutor.analysis();
         operationExecutor.stopReporters();
