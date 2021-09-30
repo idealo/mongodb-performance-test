@@ -41,11 +41,11 @@ public class OperationExecutor implements Runnable {
     private final IOperation operation;
     private final File csvFolder;
     private final CountDownLatch runModeLatch;
-    private final CountDownLatch endLatch;
+    private final CountDownLatch endAllOperationsLatch;
     private final String timerPerSecondName;
     private final String timerPerRunName;
 
-    public OperationExecutor(int threadCount, long opsCount, long maxDurationInSeconds, IOperation operation, CountDownLatch runModeLatch, CountDownLatch endLatch){
+    public OperationExecutor(int threadCount, long opsCount, long maxDurationInSeconds, IOperation operation, CountDownLatch runModeLatch, CountDownLatch endAllOperationsLatch){
         LOG.info(">>> OperationExecutor threadCount: {}, opsCount: {}, maxDurationInSeconds: {}, operation: {}", threadCount, opsCount, maxDurationInSeconds, operation.getClass().getSimpleName());
         this.csvFolder = getJarLocation();
         this.threadCount = threadCount;
@@ -53,7 +53,7 @@ public class OperationExecutor implements Runnable {
         this.maxDurationInSeconds = maxDurationInSeconds;
         this.operation = operation;
         this.runModeLatch = runModeLatch;
-        this.endLatch = endLatch;
+        this.endAllOperationsLatch = endAllOperationsLatch;
         this.timerPerSecondName = TIMER_PER_SECOND_PREFIX + operation.getOperationMode();
         this.timerPerRunName = TIMER_PER_RUN_PREFIX + operation.getOperationMode();
         final MetricRegistry registry = new MetricRegistry();
@@ -153,8 +153,8 @@ public class OperationExecutor implements Runnable {
         LOG.info("Done ({}) in {} ms ", notTimedOut ? "in time" : "timed out", durationInMs);
         runModeLatch.countDown();
         endGate.await();//if maxDurationInSeconds was reached, threads are still running by working on connections that will be closed right now, so wait until all threads have stopped to avoid trying to use closed connections, which would throws errors
-        endLatch.countDown();
-        endLatch.await(); // ensure all other operations have completed running their threads
+        endAllOperationsLatch.countDown();
+        endAllOperationsLatch.await(); // ensure all other operations have completed running their threads
         executor.shutdownNow();
     }
 
