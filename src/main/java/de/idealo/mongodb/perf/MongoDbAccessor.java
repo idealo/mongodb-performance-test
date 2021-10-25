@@ -56,6 +56,8 @@ public class MongoDbAccessor {
         try {
             MongoClientOptions options = MongoClientOptions.builder().
                     connectTimeout(1000*2).//fail fast, so we know this node is unavailable
+                    maxConnectionIdleTime(1000 * 60).
+                    maxConnectionLifeTime(1000 * 60).
                     socketTimeout(socketTimeOut==-1?1000*10:socketTimeOut).//default 10 seconds
                     readPreference(ReadPreference.secondaryPreferred()).
                     connectionsPerHost(5000).
