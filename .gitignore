@@ -4,3 +4,8 @@ target/
 *.log
 .~lock*
 .git*
+
+.classpath
+.settings/*
+.project
+launch.json
