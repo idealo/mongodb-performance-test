@@ -47,6 +47,10 @@ public class MongoDbAccessor {
     }
 
     public MongoDatabase getMongoDatabase(String dbName) {
+
+        if (mongo == null)
+            init();
+
         return mongo.getDatabase(dbName);
     }
 

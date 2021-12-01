@@ -18,23 +18,35 @@ public abstract class AbstractOperation implements IOperation{
 
     private final Random random = ThreadLocalRandom.current();
     private final AtomicLong affectedDocs = new AtomicLong();
-    final MongoCollection<Document> mongoCollection;
-    final MongoDbAccessor mongoDbAccessor;
-    final long minId;
-    final long maxId;
+
+    final String db; 
+    final String collection;
     final String queriedField;
+
+    final MongoDbAccessor mongoDbAccessor;
+
+    MongoCollection<Document> mongoCollection;
+    long minId;
+    long maxId;
 
     public AbstractOperation(MongoDbAccessor mongoDbAccessor, String db, String collection, String queriedField){
         this.mongoDbAccessor = mongoDbAccessor;
-        mongoCollection = mongoDbAccessor.getMongoDatabase(db).getCollection(collection);
+        this.db = db;
+        this.collection = collection;
         this.queriedField = queriedField;
+
+        initCollectionInfo();
+    }
+
+    public void initCollectionInfo() 
+    {
+        mongoCollection = mongoDbAccessor.getMongoDatabase(db).getCollection(collection);
 
         final IndexOptions options = new IndexOptions();
         options.background(false);
         mongoCollection.createIndex(new BasicDBObject(queriedField, 1), options);
         minId = getMinMax(mongoDbAccessor, queriedField, true);
         maxId = getMinMax(mongoDbAccessor, queriedField, false);
-
     }
 
     /**
@@ -73,11 +85,39 @@ public abstract class AbstractOperation implements IOperation{
         try {
             final long lAffectedDocs = executeQuery(threadId, threadRunCount, globalRunCount, selectorId, randomId);
             affectedDocs.addAndGet(lAffectedDocs);
+
+            // buggin'
+            // if (random.nextInt(100) < 1) {
+            //     synchronized(mongoDbAccessor) {    
+            //         mongoDbAccessor.closeConnections();
+            //     }
+            // }
         } 
         catch (IllegalStateException ee) {
-            LOG.error("mongoDbAccessor in illegal state... attempting to reconnect", ee);
-            mongoDbAccessor.closeConnections();
-            mongoDbAccessor.init();
+
+            synchronized(mongoDbAccessor) {
+                try {
+                    LOG.error("mongoDbAccessor in illegal state... attempting to fixup collection", ee);
+                    initCollectionInfo();
+                    final long lAffectedDocs = executeQuery(threadId, threadRunCount, globalRunCount, selectorId, randomId);
+                    affectedDocs.addAndGet(lAffectedDocs);
+                }
+                catch (IllegalStateException eee) {
+                    
+                    try {
+                        LOG.error("mongoDbAccessor in illegal state... attempting to reconnect", eee);
+                        mongoDbAccessor.closeConnections();
+                        mongoDbAccessor.init();                    
+                        initCollectionInfo();
+                        final long lAffectedDocs = executeQuery(threadId, threadRunCount, globalRunCount, selectorId, randomId);
+                        affectedDocs.addAndGet(lAffectedDocs);
+                    }
+                    catch (IllegalStateException eeee) {
+                        LOG.error("mongoDbAccessor in illegal state... can't seem to fix it", eee);
+                        System.exit(-1);
+                    }
+                }
+            }
         }
         catch (Exception e) {
             LOG.error("error while executing query on field '{}' with value '{}'", queriedField, selectorId, e);
