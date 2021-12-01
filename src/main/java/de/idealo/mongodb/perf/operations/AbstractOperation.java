@@ -73,9 +73,13 @@ public abstract class AbstractOperation implements IOperation{
         try {
             final long lAffectedDocs = executeQuery(threadId, threadRunCount, globalRunCount, selectorId, randomId);
             affectedDocs.addAndGet(lAffectedDocs);
-        } catch (Exception e) {
-            LOG.error("error while executing query on field '{}' with value '{}'", queriedField, selectorId, e);
+        } 
+        catch (IllegalStateException ee) {
+            mongoDbAccessor.init();
         }
+        catch (Exception e) {
+            LOG.error("error while executing query on field '{}' with value '{}'", queriedField, selectorId, e);
+        } 
     }
 
     @Override

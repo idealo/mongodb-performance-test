@@ -50,8 +50,7 @@ public class MongoDbAccessor {
         return mongo.getDatabase(dbName);
     }
 
-
-    private void init() {
+    public void init() {
         LOG.info(">>> init {}", serverAddress);
         try {
             MongoClientOptions options = MongoClientOptions.builder().
