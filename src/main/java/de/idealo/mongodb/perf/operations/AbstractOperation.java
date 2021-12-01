@@ -75,6 +75,7 @@ public abstract class AbstractOperation implements IOperation{
             affectedDocs.addAndGet(lAffectedDocs);
         } 
         catch (IllegalStateException ee) {
+            LOG.error("mongoDbAccessor in illegal state... attempting to reconnect", ee);
             mongoDbAccessor.init();
         }
         catch (Exception e) {
