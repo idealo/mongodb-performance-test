@@ -274,16 +274,15 @@ public class Main {
 
         int run=0;
         CountDownLatch runModeLatch = new CountDownLatch(modes.size());
-        CountDownLatch endAllOperationsLatch     = new CountDownLatch(modes.size());
+
         final ExecutorService executor = Executors.newFixedThreadPool(modes.size());
         try {
             for(int threadCount : threadCounts) {
                 if(run >= modes.size()){
                     run = 0;
                     LOG.info("All run modes are running with their specified number of threads. Waiting on finishing of each run mode before continuing...");
-                    endAllOperationsLatch.await();
+                    runModeLatch.await();
                     runModeLatch = new CountDownLatch(modes.size());
-                    endAllOperationsLatch    = new CountDownLatch(modes.size());
                 }
 
                 final String mode = modes.get(run);
@@ -318,12 +317,12 @@ public class Main {
                     operation = insertOperation;
                 }
 
-                OperationExecutor operationExecutor = new OperationExecutor(threadCount, operationsCount, maxDurationInSeconds, operation, runModeLatch, endAllOperationsLatch);
+                OperationExecutor operationExecutor = new OperationExecutor(threadCount, operationsCount, maxDurationInSeconds, operation, runModeLatch);
                 executor.execute(operationExecutor);
                 run++;
             }
 
-            endAllOperationsLatch.await();
+            runModeLatch.await();
 
         } catch (Exception e) {
             LOG.error("Error while waiting on thread.", e);

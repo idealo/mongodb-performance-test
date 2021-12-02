@@ -17,6 +17,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -41,11 +42,10 @@ public class OperationExecutor implements Runnable {
     private final IOperation operation;
     private final File csvFolder;
     private final CountDownLatch runModeLatch;
-    private final CountDownLatch endAllOperationsLatch;
     private final String timerPerSecondName;
     private final String timerPerRunName;
 
-    public OperationExecutor(int threadCount, long opsCount, long maxDurationInSeconds, IOperation operation, CountDownLatch runModeLatch, CountDownLatch endAllOperationsLatch){
+    public OperationExecutor(int threadCount, long opsCount, long maxDurationInSeconds, IOperation operation, CountDownLatch runModeLatch){
         LOG.info(">>> OperationExecutor threadCount: {}, opsCount: {}, maxDurationInSeconds: {}, operation: {}", threadCount, opsCount, maxDurationInSeconds, operation.getClass().getSimpleName());
         this.csvFolder = getJarLocation();
         this.threadCount = threadCount;
@@ -53,7 +53,6 @@ public class OperationExecutor implements Runnable {
         this.maxDurationInSeconds = maxDurationInSeconds;
         this.operation = operation;
         this.runModeLatch = runModeLatch;
-        this.endAllOperationsLatch = endAllOperationsLatch;
         this.timerPerSecondName = TIMER_PER_SECOND_PREFIX + operation.getOperationMode();
         this.timerPerRunName = TIMER_PER_RUN_PREFIX + operation.getOperationMode();
         final MetricRegistry registry = new MetricRegistry();
@@ -121,18 +120,20 @@ public class OperationExecutor implements Runnable {
 
     private void executeThreads() throws InterruptedException {
 
+        final AtomicBoolean finish = new AtomicBoolean(false);
 
-        final CountDownLatch startGate = new CountDownLatch(1);
-        final CountDownLatch endGate = new CountDownLatch(threadCount);
-        final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        final CountDownLatch startGate  = new CountDownLatch(1);
+        final CountDownLatch endGate    = new CountDownLatch(threadCount);
+        final ExecutorService executor  = Executors.newFixedThreadPool(threadCount);
         final long start = System.currentTimeMillis();
         final AtomicLong runCounter = new AtomicLong(0L);
 
         range(0, threadCount).forEach(t -> executor.submit(() -> {
                             try {
                                 startGate.await();
-                                int count=1;
-                                while((runCounter.get() < opsCount || opsCount==0) && runModeLatch.getCount()>0){//if opsCount==0 then it terminates when maxDurationInSeconds is reached
+                                int count = 1;
+                                while( (runCounter.get() < opsCount || opsCount == 0) && !finish.get() ){
+                                    // if opsCount==0 then it terminates when maxDurationInSeconds is reached
                                     doOperation(t+1, count++, runCounter.incrementAndGet());
                                 }
                             } catch (InterruptedException e) {
@@ -149,12 +150,13 @@ public class OperationExecutor implements Runnable {
         final long end = System.currentTimeMillis();
         final long durationInMs = end-start;
 
+        finish.set(true);
+
+        endGate.await();
 
         LOG.info("Done ({}) in {} ms ", notTimedOut ? "in time" : "timed out", durationInMs);
+        
         runModeLatch.countDown();
-        endGate.await();//if maxDurationInSeconds was reached, threads are still running by working on connections that will be closed right now, so wait until all threads have stopped to avoid trying to use closed connections, which would throws errors
-        endAllOperationsLatch.countDown();
-        endAllOperationsLatch.await(); // ensure all other operations have completed running their threads
         executor.shutdownNow();
     }
 
@@ -216,7 +218,7 @@ public class OperationExecutor implements Runnable {
         ServerAddress serverAddress = new ServerAddress("test-db:27017");
         MongoDbAccessor mongoDbAccessor = new MongoDbAccessor("user", "pw", "testdb", true, serverAddress);
         InsertOperation insertOperation = new InsertOperation(mongoDbAccessor, "testdb", "perf", IOperation.ID);
-        OperationExecutor operationExecutor = new OperationExecutor(10, 1000000, 3600, insertOperation, new CountDownLatch(1), new CountDownLatch(1));
+        OperationExecutor operationExecutor = new OperationExecutor(10, 1000000, 3600, insertOperation, new CountDownLatch(1));
         operationExecutor.executeThreads();
         operationExecutor.analysis();
         operationExecutor.stopReporters();
