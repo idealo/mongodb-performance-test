@@ -61,7 +61,7 @@ public class MongoDbAccessor {
                     connectTimeout(1000 * 10). // fail fast, so we know this node is unavailable
                     // maxConnectionIdleTime(1000 * 60).
                     // maxConnectionLifeTime(1000 * 60).
-                    socketTimeout(socketTimeOut == -1 ? 1000 * 120 : socketTimeOut). //default 120 seconds
+                    // socketTimeout(socketTimeOut == -1 ? 1000 * 120 : socketTimeOut). // use default (no timeout)
                     readPreference(ReadPreference.secondaryPreferred()).
                     connectionsPerHost(5000).
                     threadsAllowedToBlockForConnectionMultiplier(10).
