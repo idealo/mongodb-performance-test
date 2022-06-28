@@ -274,12 +274,16 @@ public class Main {
 
         int run=0;
         CountDownLatch runModeLatch = new CountDownLatch(modes.size());
+
         final ExecutorService executor = Executors.newFixedThreadPool(modes.size());
+
+        LOG.info("OPERATION SETUP: Total modes {}", modes.size());
+
         try {
             for(int threadCount : threadCounts) {
                 if(run >= modes.size()){
                     run = 0;
-                    LOG.info("All run modes are running with their specified number of threads. Waiting on finishing of each run mode before continuing...");
+                    LOG.info("OPERATION SETUP: All run modes are running with their specified number of threads. Waiting on finishing of each run mode before continuing...");
                     runModeLatch.await();
                     runModeLatch = new CountDownLatch(modes.size());
                 }
@@ -287,6 +291,7 @@ public class Main {
                 final String mode = modes.get(run);
                 final long operationsCount = operationsCounts.size()>run?operationsCounts.get(run):operationsCounts.get(0);
                 IOperation operation = null;
+                LOG.info("OPERATION SETUP: Adding run mode {}", mode);
                 if (mode.equals(OperationModes.UPDATE_ONE.name())) {
                     operation = new UpdateOperation(mongoDbAccessor, database, collection, IOperation.ID);
                 } else if (mode.equals(OperationModes.UPDATE_MANY.name())) {
@@ -306,9 +311,9 @@ public class Main {
                 } else {
                     InsertOperation insertOperation = new InsertOperation(mongoDbAccessor, database, collection, IOperation.ID);
                     if (dropDb) {
-                        LOG.info("drop database '{}'", database);
+                        LOG.info("OPERATION SETUP: drop database '{}'", database);
                         mongoDbAccessor.getMongoDatabase(database).drop();
-                        LOG.info("database '{}' dropped", database);
+                        LOG.info("OPERATION SETUP: database '{}' dropped", database);
                     }
                     if(randomFieldLength > 0){
                         insertOperation.setRandomFieldLength(randomFieldLength);
@@ -324,7 +329,8 @@ public class Main {
             runModeLatch.await();
 
         } catch (Exception e) {
-            LOG.error("Error while waiting on thread.", e);
+            LOG.error("OPERATION SETUP: Error while waiting on thread... exiting now.", e);
+            System.exit(-1);
         }finally {
             executor.shutdown();
             mongoDbAccessor.closeConnections();
