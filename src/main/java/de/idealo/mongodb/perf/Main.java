@@ -28,6 +28,7 @@ public class Main {
     int port = DEFAULT_PORT;
     String database = null;
     String collection = null;
+    String url = null;
     String user = null;
     String password = null;
     String authDb = null;
@@ -143,8 +144,7 @@ public class Main {
             if(threadCounts.size() % modes.size() != 0){
                 throw new IllegalArgumentException("Number of thread parameters (-t) must be a multiple of number of modes parameters (-m) but was "+threadCounts.size()+" and "+modes.size()+".");
             }
-
-
+            url = cmdLine.getOptionValue("url");
             user = cmdLine.getOptionValue("u");
             password = cmdLine.getOptionValue("p");
             authDb = cmdLine.getOptionValue("adb");
@@ -258,6 +258,7 @@ public class Main {
                         .build())
                 .addOption(Option.builder("db").longOpt("database").hasArg().argName("DB").desc("mongoDB database on which the performance test is executed").build())
                 .addOption(Option.builder("c").longOpt("collection").hasArg().argName("COLLECTION").desc("mongoDB collection on which the performance test is executed").build())
+                .addOption(Option.builder("url").longOpt("url").hasArg().argName("URL").desc("mongoDB URL").build())
                 .addOption(Option.builder("u").longOpt("user").hasArg().argName("USER").desc("mongoDB user").build())
                 .addOption(Option.builder("p").longOpt("password").hasArg().argName("PASSWORD").desc("mongoDB password").build())
                 .addOption(Option.builder("adb").longOpt("authdb").hasArg().argName("AUTH_DB").desc("mongoDB database to be authenticated against (default: value of parameter -db)").build())
@@ -270,7 +271,7 @@ public class Main {
     private void executeOperations() {
 
         final ServerAddress serverAddress = new ServerAddress(host, port);
-        final MongoDbAccessor mongoDbAccessor = new MongoDbAccessor(user, password, authDb, ssl, serverAddress);
+        final MongoDbAccessor mongoDbAccessor = new MongoDbAccessor(user, password, authDb, ssl, url,serverAddress);
 
         int run=0;
         CountDownLatch runModeLatch = new CountDownLatch(modes.size());
