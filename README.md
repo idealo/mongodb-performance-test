@@ -28,8 +28,8 @@ java -cp ./latest-version/mongodb-performance-test.jar de.idealo.mongodb.perf.Ma
 This will print a description how to use the program:
 ```
 usage: de.idealo.mongodb.perf.Main [-H] [-v] [-m <MODE>] [-o <OPERATIONS_COUNT>] [-t <THREADS>] [-d <DURATION>] [-dropdb] [-s <RANDOM_TEXT_SIZE>] [-h <HOST>]
-       [-port <PORT>] [-db <DB>] [-c <COLLECTION>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>]
-*** mongoDB performance test (version 1.0.5)***
+       [-port <PORT>] [-db <DB>] [-c <COLLECTION>] [-url <URL>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>] [-ssl]
+*** mongoDB performance test (version 1.1.3)***
 Please run first mode=INSERT in order to have a non-empty collection to test on.
 You may add option 'dropdb' in order to drop the database before inserting documents.
 Documents are inserted one by one (no bulk insert).
@@ -77,22 +77,12 @@ Options:
  -port,--port <PORT>                       mongoDB port (default 27017)
  -db,--database <DB>                       mongoDB database on which the performance test is executed
  -c,--collection <COLLECTION>              mongoDB collection on which the performance test is executed
+ -url,--url <URL>                          mongoDB URL
  -u,--user <USER>                          mongoDB user
  -p,--password <PASSWORD>                  mongoDB password
  -adb,--authdb <AUTH_DB>                   mongoDB database to be authenticated against (default: value of parameter -db)
  -ssl,--ssl                                use SSL to connect to mongoDB
-```
-
-Required parameters are at least:
-```
-  -db,--database <DB>                       mongoDB database on which the performance test is executed
-  -c,--collection <COLLECTION>              mongoDB collection on which the performance test is executed
-```
-If the database uses authentication, you'll need furthermore:
-```
-  -u,--user <USER>                          mongoDB user
-  -p,--password <PASSWORD>                  mongoDB password
-  -adb,--authdb <AUTH_DB>                   mongoDB database to be authenticated against 
+@author kay.agahd@idealo.de
 ```
 
 ### Some examples
@@ -126,6 +116,11 @@ To test the performance of both updating one document per query and simultaneous
 java -jar $jarfile -m update_one iterate_many -d 3600 -t 10 20 20 40 30 60 -db test -c perf
 ```
 
+#### Connect using MongoDB replicaset URL 
+To connect to a MongoDB replicaset with mongodb url and execute a test - 
+```
+java -jar $jarfile -m update_one iterate_many -url mongodb://<username>:<password>@host-1:27017,host-2:27017,host-3:27017/?replicaSet=<rsName> -d 3600 -t 10 20 20 40 30 60 -db test -c perf
+```
 
 ## Output
 
