@@ -216,7 +216,7 @@ public class OperationExecutor implements Runnable {
     public static void main(String[] args) throws InterruptedException {
 
         ServerAddress serverAddress = new ServerAddress("test-db:27017");
-        MongoDbAccessor mongoDbAccessor = new MongoDbAccessor("user", "pw", "testdb", true, serverAddress);
+        MongoDbAccessor mongoDbAccessor = new MongoDbAccessor("user", "pw", "testdb", true, null,serverAddress);
         InsertOperation insertOperation = new InsertOperation(mongoDbAccessor, "testdb", "perf", IOperation.ID);
         OperationExecutor operationExecutor = new OperationExecutor(10, 1000000, 3600, insertOperation, new CountDownLatch(1));
         operationExecutor.executeThreads();
