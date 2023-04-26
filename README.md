@@ -2,6 +2,7 @@
 
 This java application tests mongoDB performance, such as latency and throughput, by running one or more threads executing either all the same or different database operations, such as Inserts, Updates, Deletes, Counts or Finds until a defined number of operations is executed or a defined maximum runtime is reached.
 
+We use this software to test whether new hardware leads to better performance such as latency and throughput for our MongoDB installations.  
 
 
 ## Start
