@@ -184,14 +184,16 @@ For example, 50 threads inserted a total of 1 million of documents, so the range
 
 ## Version history
 
+* v1.1.4
+  + improvement: replace `logback-classic` v1.4.6 by v1.4.12 to close a potential security vulnerability
 * v1.1.3
   + new: parameter `--url` added to use MongoDB's [connection String format](https://www.mongodb.com/docs/manual/reference/connection-string/)   
   + improvement: dependencies updated
   + contributor: [Soumen Karmakar](https://github.com/soumencemk)
 * v1.1.2
-  + improvement: replace logback-classic v1.1.3 by v1.2.0 to close a potential security vulnerability
+  + improvement: replace `logback-classic` v1.1.3 by v1.2.0 to close a potential security vulnerability
 * v1.1.1
-    + improvement: replace junit v4.12 by v4.13.1 to close a potential security vulnerability
+    + improvement: replace `junit` v4.12 by v4.13.1 to close a potential security vulnerability
 * v1.1.0
     + new: new option to connect via ssl
 * v1.0.5
