@@ -10,7 +10,7 @@ We use this software to test whether new hardware leads to better performance su
 
 ### Preconditions
 
-1. java 1.8 or newer
+1. java 11 or newer
 
 ### Run
 
