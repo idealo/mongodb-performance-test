@@ -83,6 +83,7 @@ Options:
  -p,--password <PASSWORD>                  mongoDB password
  -adb,--authdb <AUTH_DB>                   mongoDB database to be authenticated against (default: value of parameter -db)
  -ssl,--ssl                                use SSL to connect to mongoDB
+ -wc, --writeconcern <WRITE_CONCERN>       write concern for the operations (default: ACKNOWLEDGED) (options: ACKNOWLEDGED, UNACKNOWLEDGED, JOURNALED, MAJORITY)
 ```
 
 ### Some examples
