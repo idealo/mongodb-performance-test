@@ -29,7 +29,7 @@ java -cp ./latest-version/mongodb-performance-test.jar de.idealo.mongodb.perf.Ma
 This will print a description how to use the program:
 ```
 usage: de.idealo.mongodb.perf.Main [-H] [-v] [-m <MODE>] [-o <OPERATIONS_COUNT>] [-t <THREADS>] [-d <DURATION>] [-dropdb] [-s <RANDOM_TEXT_SIZE>] [-h <HOST>]
-       [-port <PORT>] [-db <DB>] [-c <COLLECTION>] [-url <URL>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>] [-ssl]
+       [-port <PORT>] [-db <DB>] [-c <COLLECTION>] [-url <URL>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>] [-ssl] [-wc <WRITE_CONCERN>]
 *** mongoDB performance test (version 1.1.3)***
 Please run first mode=INSERT in order to have a non-empty collection to test on.
 You may add option 'dropdb' in order to drop the database before inserting documents.
