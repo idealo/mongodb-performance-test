@@ -185,6 +185,8 @@ For example, 50 threads inserted a total of 1 million of documents, so the range
 
 ## Version history
 
+* v1.2.0
+  + improvement: added `--writeconcern` option to pass [write concern](https://www.mongodb.com/docs/manual/reference/write-concern/) (ACKNOWLEDGED, UNACKNOWLEDGED, JOURNALED, MAJORITY) to the operations.
 * v1.1.4
   + improvement: replace `logback-classic` v1.4.6 by v1.4.12 to close a potential security vulnerability
 * v1.1.3
