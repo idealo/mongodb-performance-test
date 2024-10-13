@@ -45,6 +45,6 @@ jobs:
           git config --local user.email "github-actions@idealo.de"
           git config --local user.name "github-actions[bot]"
           
-          git add target/mongodb-performance-test.jar
+          git add -f target/mongodb-performance-test.jar
           git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
           git push origin master
