@@ -52,7 +52,11 @@ jobs:
           
           git add latest-version/mongodb-performance-test.jar
           git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
+          
+          # Delete the local tag if it exists, then recreate it
+          git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
           git tag -a "v$VERSION" -m "Tagging version $VERSION"
+          
           git push origin master
           
           echo "### Version updated to $VERSION" >> $GITHUB_STEP_SUMMARY
