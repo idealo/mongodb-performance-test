@@ -1,0 +1,50 @@
+name: Build jar-file of latest version containing all dependencies
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt' # You can choose other distributions like 'zulu' or 'temurin'
+          java-version: '11'
+
+      # Cache Maven dependencies to speed up builds
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build and package JAR with dependencies
+        run: mvn clean package
+
+      - name: Copy JAR to latest-version folder
+        run: |
+          mv target/*-jar-with-dependencies.jar target/mongodb-performance-test.jar
+
+      - name: Commit jar file to repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          git config --local user.email "github-actions@idealo.de"
+          git config --local user.name "github-actions[bot]"
+          
+          git add target/mongodb-performance-test.jar
+          git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
+          git push origin master

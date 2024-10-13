@@ -3,7 +3,7 @@ target/
 *.csv
 *.log
 .~lock*
-.git*
+.git_*
 
 .classpath
 .settings/*
