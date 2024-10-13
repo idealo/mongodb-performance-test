@@ -33,9 +33,10 @@ jobs:
       - name: Build and package JAR with dependencies
         run: mvn clean package
 
-      - name: Copy JAR to latest-version folder
+      - name: Move JAR to latest-version folder
         run: |
-          mv target/*-jar-with-dependencies.jar target/mongodb-performance-test.jar
+          mkdir -p latest-version
+          mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
 
       - name: Commit jar file to repository
         env:
@@ -45,6 +46,6 @@ jobs:
           git config --local user.email "github-actions@idealo.de"
           git config --local user.name "github-actions[bot]"
           
-          git add -f target/mongodb-performance-test.jar
+          git add latest-version/mongodb-performance-test.jar
           git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
           git push origin master
