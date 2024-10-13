@@ -41,7 +41,7 @@ jobs:
           mkdir -p latest-version
           mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
 
-      - name: Commit jar file to repository
+      - name: Commit jar file to repository and add version tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
