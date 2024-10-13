@@ -1,6 +1,7 @@
 package de.idealo.mongodb.perf;
 
 import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
 import de.idealo.mongodb.perf.operations.*;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class Main {
     boolean dropDb = false;
     private final String version;
     private int randomFieldLength = 0;
+    private WriteConcern writeConcern = WriteConcern.ACKNOWLEDGED;
 
     public Main(){
         version = getClass().getPackage().getImplementationVersion();
@@ -127,7 +129,6 @@ public class Main {
                 }
             }
 
-
             if (cmdLine.hasOption("t")) {
                 final String[] t_arg = cmdLine.getOptionValues("t");
                 for (int i = 0; i < t_arg.length; i++) {
@@ -166,7 +167,25 @@ public class Main {
                 }
             }
 
-
+            if (cmdLine.hasOption("writeconcern")) {
+                String wcOption = cmdLine.getOptionValue("writeconcern").toUpperCase();
+                switch (wcOption) {
+                    case "ACKNOWLEDGED":
+                        writeConcern = WriteConcern.ACKNOWLEDGED;
+                        break;
+                    case "UNACKNOWLEDGED":
+                        writeConcern = WriteConcern.UNACKNOWLEDGED;
+                        break;
+                    case "JOURNALED":
+                        writeConcern = WriteConcern.JOURNALED;
+                        break;
+                    case "MAJORITY":
+                        writeConcern = WriteConcern.MAJORITY;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid WriteConcern value: " + wcOption);
+                }
+            }
 
         } catch (Exception e) {
             LOG.error(e.getMessage());
@@ -263,15 +282,25 @@ public class Main {
                 .addOption(Option.builder("p").longOpt("password").hasArg().argName("PASSWORD").desc("mongoDB password").build())
                 .addOption(Option.builder("adb").longOpt("authdb").hasArg().argName("AUTH_DB").desc("mongoDB database to be authenticated against (default: value of parameter -db)").build())
                 .addOption(new Option("ssl", "ssl", false, "use SSL to connect to mongoDB"))
-        ;
-
+                .addOption(Option.builder("wc").longOpt("writeconcern").hasArg().argName("WRITE_CONCERN")
+                        .desc("WriteConcern for MongoDB operations (ACKNOWLEDGED, UNACKNOWLEDGED, JOURNALED, MAJORITY)")
+                        .build());
         return options;
     }
 
     private void executeOperations() {
 
         final ServerAddress serverAddress = new ServerAddress(host, port);
-        final MongoDbAccessor mongoDbAccessor = new MongoDbAccessor(user, password, authDb, ssl, url,serverAddress);
+        final MongoDbAccessor mongoDbAccessor = new MongoDbAccessor(
+                -1, // socketTimeOut
+                user,
+                password,
+                authDb,
+                ssl,
+                url,
+                writeConcern,
+                serverAddress
+        );
 
         int run=0;
         CountDownLatch runModeLatch = new CountDownLatch(modes.size());
@@ -336,7 +365,6 @@ public class Main {
             executor.shutdown();
             mongoDbAccessor.closeConnections();
         }
-
     }
 
     public static void main(String... args){
@@ -344,6 +372,4 @@ public class Main {
         m.validateInput(args);
         m.executeOperations();
     }
-
-
 }

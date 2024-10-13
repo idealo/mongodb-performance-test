@@ -29,7 +29,7 @@ java -cp ./latest-version/mongodb-performance-test.jar de.idealo.mongodb.perf.Ma
 This will print a description how to use the program:
 ```
 usage: de.idealo.mongodb.perf.Main [-H] [-v] [-m <MODE>] [-o <OPERATIONS_COUNT>] [-t <THREADS>] [-d <DURATION>] [-dropdb] [-s <RANDOM_TEXT_SIZE>] [-h <HOST>]
-       [-port <PORT>] [-db <DB>] [-c <COLLECTION>] [-url <URL>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>] [-ssl]
+       [-port <PORT>] [-db <DB>] [-c <COLLECTION>] [-url <URL>] [-u <USER>] [-p <PASSWORD>] [-adb <AUTH_DB>] [-ssl] [-wc <WRITE_CONCERN>]
 *** mongoDB performance test (version 1.1.3)***
 Please run first mode=INSERT in order to have a non-empty collection to test on.
 You may add option 'dropdb' in order to drop the database before inserting documents.
@@ -83,6 +83,7 @@ Options:
  -p,--password <PASSWORD>                  mongoDB password
  -adb,--authdb <AUTH_DB>                   mongoDB database to be authenticated against (default: value of parameter -db)
  -ssl,--ssl                                use SSL to connect to mongoDB
+ -wc, --writeconcern <WRITE_CONCERN>       write concern for the operations (default: ACKNOWLEDGED) (options: ACKNOWLEDGED, UNACKNOWLEDGED, JOURNALED, MAJORITY)
 ```
 
 ### Some examples
@@ -184,6 +185,8 @@ For example, 50 threads inserted a total of 1 million of documents, so the range
 
 ## Version history
 
+* v1.2.0
+  + improvement: added `--writeconcern` option to pass [write concern](https://www.mongodb.com/docs/manual/reference/write-concern/) (ACKNOWLEDGED, UNACKNOWLEDGED, JOURNALED, MAJORITY) to the operations.
 * v1.1.4
   + improvement: replace `logback-classic` v1.4.6 by v1.4.12 to close a potential security vulnerability
 * v1.1.3

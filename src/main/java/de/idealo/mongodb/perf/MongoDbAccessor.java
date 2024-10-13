@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 
-/**
- * Created by kay.agahd on 23.11.16.
- */
 public class MongoDbAccessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(MongoDbAccessor.class);
@@ -25,27 +22,29 @@ public class MongoDbAccessor {
     private final String pw;
     private final String authDb;
     private final boolean ssl;
+    private final WriteConcern writeConcern;
     private MongoClient mongo;
 
     private MongoDbAccessor() {
-        this(-1, null, null, null, false, null);
+        this(-1, null, null, null, false, null, WriteConcern.ACKNOWLEDGED);
     };
 
     public MongoDbAccessor(String user, String pw, String authDb, boolean ssl, String url, ServerAddress... serverAddress) {
-		this(-1, user, pw, authDb, ssl, url, serverAddress);
-	}
+        this(-1, user, pw, authDb, ssl, url, WriteConcern.ACKNOWLEDGED, serverAddress);
+    }
 
-    public MongoDbAccessor(int socketTimeOut, String user, String pw, String authDb, boolean ssl, String url, ServerAddress... serverAddress) {
-		this.serverAddress = serverAddress;
-		this.user = user;
-		this.pw = pw;
-		this.authDb = authDb != null && !authDb.isEmpty() ? authDb : "admin";
-		this.ssl = ssl;
-		this.url = url;
+    public MongoDbAccessor(int socketTimeOut, String user, String pw, String authDb, boolean ssl, String url, WriteConcern writeConcern, ServerAddress... serverAddress) {
+        this.serverAddress = serverAddress;
+        this.user = user;
+        this.pw = pw;
+        this.authDb = authDb != null && !authDb.isEmpty() ? authDb : "admin";
+        this.ssl = ssl;
+        this.url = url;
         this.socketTimeOut = socketTimeOut;
-		init();
-	}
-    
+        this.writeConcern = writeConcern != null ? writeConcern : WriteConcern.ACKNOWLEDGED; // Use default if null
+        init();
+    }
+
     public MongoDatabase getMongoDatabase(String dbName) {
 
         if (mongo == null)
@@ -57,15 +56,9 @@ public class MongoDbAccessor {
     public void init() {
         LOG.info(">>> init {}", serverAddress);
         try {
-            MongoClientOptions options = MongoClientOptions.builder().connectTimeout(1000 * 10). // fail fast, so we
-                                                                                                 // know this node is
-                                                                                                 // unavailable
-            // maxConnectionIdleTime(1000 * 60).
-            // maxConnectionLifeTime(1000 * 60).
-            // socketTimeout(socketTimeOut == -1 ? 1000 * 120 : socketTimeOut). // use
-            // default (no timeout)
-                    readPreference(ReadPreference.secondaryPreferred()).connectionsPerHost(5000)
-                    .threadsAllowedToBlockForConnectionMultiplier(10).writeConcern(WriteConcern.ACKNOWLEDGED)
+            MongoClientOptions options = MongoClientOptions.builder().connectTimeout(1000 * 10) // fail fast, so we know this node is unavailable
+                    .readPreference(ReadPreference.secondaryPreferred()).connectionsPerHost(5000)
+                    .threadsAllowedToBlockForConnectionMultiplier(10).writeConcern(writeConcern) // Use configurable WriteConcern
                     .sslEnabled(ssl).sslInvalidHostNameAllowed(true).build();
 
             if (url != null && !url.isEmpty()) {
