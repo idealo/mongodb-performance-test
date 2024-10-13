@@ -43,9 +43,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          
           git config --local user.email "github-actions@idealo.de"
           git config --local user.name "github-actions[bot]"
           
           git add latest-version/mongodb-performance-test.jar
           git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
           git push origin master
+          
+          echo "### Version updated to $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "The [latest-version/mongodb-performance-test.jar](./latest-version/mongodb-performance-test.jar) is now $VERSION" >> $GITHUB_STEP_SUMMARY
