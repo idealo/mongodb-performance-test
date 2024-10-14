@@ -38,6 +38,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p latest-version
+          pwd
+          ls -al
+          git status
           if ! cmp -s target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar; then
             mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
           
