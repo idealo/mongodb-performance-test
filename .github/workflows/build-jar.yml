@@ -45,25 +45,21 @@ jobs:
           git checkout -b ${{ github.event.pull_request.head.ref }}
           git status
           
-          # Check if there are staged changes
-          if [ -z "$(git diff --name-only)" ]; then
-            echo "### Build unchanged" >> $GITHUB_STEP_SUMMARY
-            echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is unchanged" >> $GITHUB_STEP_SUMMARY
-          else
-            git add latest-version/mongodb-performance-test.jar
-            
-            git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
-            git status
-            git push origin
-            git status
           
-            # Delete the local tag if it exists
-            git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
-            git tag -a "v$VERSION" -m "Tagging version $VERSION"
-            git push origin :refs/tags/v$VERSION || true  # delete remote tag, if exists
-            git push origin "v$VERSION"  # create remote tag
-      
-            echo "### Version updated to $VERSION" >> $GITHUB_STEP_SUMMARY
-            echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is now $VERSION" >> $GITHUB_STEP_SUMMARY
-          fi
+          git add latest-version/mongodb-performance-test.jar
+          
+          git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar" --allow-empty
+          git status
+          git push origin ${{ github.head_ref }}
+          git status
+        
+          # Delete the local tag if it exists
+          git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
+          git tag -a "v$VERSION" -m "Tagging version $VERSION"
+          git push origin :refs/tags/v$VERSION || true  # delete remote tag, if exists
+          git push origin "v$VERSION"  # create remote tag
+    
+          echo "### Version updated to $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is now $VERSION" >> $GITHUB_STEP_SUMMARY
+          
           
