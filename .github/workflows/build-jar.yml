@@ -25,41 +25,40 @@ jobs:
           distribution: 'adopt' # You can choose other distributions like 'zulu' or 'temurin'
           java-version: '11'
 
+      - name: Pull branch
+        run: |
+          git checkout -b ${{ github.event.pull_request.head.ref }}
+          git pull origin ${{ github.event.pull_request.head.ref }} --rebase || echo "No changes to pull"
+
       - name: Build and package JAR with dependencies
         run: mvn clean package
 
-      - name: Move JAR to latest-version folder
-        run: |
-          mkdir -p latest-version
-          mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
-
-      - name: Commit jar file to repository and add version tag
+      - name: commit changes of jar file
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          mkdir -p latest-version
+          if ! cmp -s target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar; then
+            mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
           
-          git config --local user.email "github-actions@idealo.de"
-          git config --local user.name "github-actions[bot]"
+            VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           
-          git checkout -b ${{ github.event.pull_request.head.ref }}
-          git status
+            git config --local user.email "github-actions@idealo.de"
+            git config --local user.name "github-actions[bot]"
+            
+            git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
+            git push origin ${{ github.event.pull_request.head.ref }}
           
+            # Delete the local tag if it exists
+            git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
+            git tag -a "v$VERSION" -m "Tagging version $VERSION"
+            git push origin :refs/tags/v$VERSION || true  # delete remote tag, if exists
+            git push origin "v$VERSION"  # create remote tag
           
-          git add latest-version/mongodb-performance-test.jar
-          
-          git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar" --allow-empty
-          git status
-          git push origin ${{ github.head_ref }}
-          git status
-        
-          # Delete the local tag if it exists
-          git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
-          git tag -a "v$VERSION" -m "Tagging version $VERSION"
-          git push origin :refs/tags/v$VERSION || true  # delete remote tag, if exists
-          git push origin "v$VERSION"  # create remote tag
-    
-          echo "### Version updated to $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is now $VERSION" >> $GITHUB_STEP_SUMMARY
-          
-          
+            echo "### Version updated to $VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is now $VERSION" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Build unchanged" >> $GITHUB_STEP_SUMMARY
+            echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is unchanged" >> $GITHUB_STEP_SUMMARY          
+          fi
+
