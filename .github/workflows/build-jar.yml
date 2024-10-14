@@ -46,7 +46,7 @@ jobs:
           git status
           
           # Check if there are staged changes
-          if git diff --staged --quiet; then
+          if [ -z "$(git diff --name-only)" ]; then
             echo "### Build unchanged" >> $GITHUB_STEP_SUMMARY
             echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is unchanged" >> $GITHUB_STEP_SUMMARY
           else
