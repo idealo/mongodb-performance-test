@@ -40,6 +40,7 @@ jobs:
           git config --local user.email "github-actions@idealo.de"
           git config --local user.name "github-actions[bot]"
           
+          git pull origin ${{ github.head_ref }} --rebase || echo "No changes to pull"
           git add latest-version/mongodb-performance-test.jar
           
           # Check if there are staged changes
@@ -48,7 +49,6 @@ jobs:
             echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is unchanged" >> $GITHUB_STEP_SUMMARY
           else
             git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
-            git pull origin ${{ github.head_ref }} --rebase
             git push origin HEAD:${{ github.head_ref }}
           
             # Delete the local tag if it exists
