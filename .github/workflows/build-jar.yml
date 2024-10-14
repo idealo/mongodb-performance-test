@@ -39,16 +39,18 @@ jobs:
         run: |
           mkdir -p latest-version
           pwd
-          ls -al
+          ls -al latest-version/
           git status
           if ! cmp -s target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar; then
             mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
+            ls -al latest-version/
           
             VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           
             git config --local user.email "github-actions@idealo.de"
             git config --local user.name "github-actions[bot]"
             
+            git add latest-version/mongodb-performance-test.jar
             git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
             git push origin ${{ github.event.pull_request.head.ref }}
           
