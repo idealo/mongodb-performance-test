@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -42,13 +44,17 @@ jobs:
           
           git add latest-version/mongodb-performance-test.jar
           
+          git status
+          
           # Check if there are staged changes
           if git diff --staged --quiet; then
             echo "### Build unchanged" >> $GITHUB_STEP_SUMMARY
             echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is unchanged" >> $GITHUB_STEP_SUMMARY
           else
             git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
-            git push origin ${{ github.head_ref }}
+            git status
+            git push origin
+            git status
           
             # Delete the local tag if it exists
             git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
