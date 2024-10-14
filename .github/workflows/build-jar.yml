@@ -50,13 +50,13 @@ jobs:
             git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
             git push
           
-            # Delete the local tag if it exists, then recreate it
+            # Delete the local tag if it exists
             git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
             git tag -a "v$VERSION" -m "Tagging version $VERSION"
-            git push --tags
-            
+            git push origin :refs/tags/v$VERSION || true  # delete remote tag, if exists
+            git push origin "v$VERSION"  # create remote tag
+      
             echo "### Version updated to $VERSION" >> $GITHUB_STEP_SUMMARY
             echo "The [latest-version/mongodb-performance-test.jar](https://github.com/idealo/mongodb-performance-test/tree/master/latest-version/mongodb-performance-test.jar) is now $VERSION" >> $GITHUB_STEP_SUMMARY
           fi
-          
           
