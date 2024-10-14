@@ -10,7 +10,7 @@ on:
       - src/main/**
 
 jobs:
-  build:
+  build-jar-file:
     runs-on: ubuntu-latest
 
     steps:
