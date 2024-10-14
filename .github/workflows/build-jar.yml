@@ -16,17 +16,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }} # Checkout the pull request source branch
 
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           distribution: 'adopt' # You can choose other distributions like 'zulu' or 'temurin'
           java-version: '11'
-
-      - name: Pull branch
-        run: |
-          git checkout -b ${{ github.event.pull_request.head.ref }}
-          git pull origin ${{ github.event.pull_request.head.ref }} --rebase || echo "No changes to pull"
 
       - name: Build and package JAR with dependencies
         run: mvn clean package
@@ -40,7 +37,6 @@ jobs:
           if ! cmp -s target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar; then
             
             mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
-            ls -al latest-version/
           
             VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           
@@ -49,7 +45,7 @@ jobs:
             
             git add latest-version/mongodb-performance-test.jar
             git commit -m "Add latest version ($VERSION) of mongodb-performance-test.jar"
-            git push origin ${{ github.event.pull_request.head.ref }}
+            git push origin ${{ github.head_ref }}
           
             # Delete the local tag if it exists
             git tag -d "v$VERSION" || true  # Ignore if the tag doesn't exist
