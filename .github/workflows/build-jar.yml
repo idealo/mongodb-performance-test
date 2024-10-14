@@ -40,7 +40,6 @@ jobs:
           git config --local user.email "github-actions@idealo.de"
           git config --local user.name "github-actions[bot]"
           
-          git pull origin ${{ github.head_ref }} --rebase || echo "No changes to pull"
           git add latest-version/mongodb-performance-test.jar
           
           # Check if there are staged changes
