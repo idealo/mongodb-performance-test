@@ -42,7 +42,7 @@ jobs:
           git config --local user.email "github-actions@idealo.de"
           git config --local user.name "github-actions[bot]"
           
-          git checkout $GITHUB_REF
+          git checkout -b ${{ github.event.pull_request.base.ref }}
           
           git add latest-version/mongodb-performance-test.jar
           
