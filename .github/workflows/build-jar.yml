@@ -2,7 +2,7 @@ name: Build jar-file of latest version containing all dependencies
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - master
     paths: # only build new jar file if pom.xml or java sources have changed
