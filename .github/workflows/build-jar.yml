@@ -36,12 +36,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p latest-version
-          pwd
-          ls -al target/
-          ls -al latest-version/
-          git status
+          
           if ! cmp -s target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar; then
-            echo "move target to latest-version"
+            
             mv target/*-jar-with-dependencies.jar latest-version/mongodb-performance-test.jar
             ls -al latest-version/
           
