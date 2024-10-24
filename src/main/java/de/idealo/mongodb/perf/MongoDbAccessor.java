@@ -93,8 +93,9 @@ public class MongoDbAccessor {
                     .sslEnabled(ssl).sslInvalidHostNameAllowed(true).build();
 
             if (url != null && !url.isEmpty()) {
-                mongo = new MongoClient(new MongoClientURI(url));
-                mongo.getMongoClientOptions().getSslContext().init(null, trustAllCerts, new java.security.SecureRandom());
+                MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+                builder.sslContext(sslContext);
+                mongo = new MongoClient(new MongoClientURI(url, builder));
             } else {
                 if (user != null && !user.isEmpty() && pw != null && !pw.isEmpty()) {
                     MongoCredential mc = MongoCredential.createCredential(user, authDb, pw.toCharArray());
