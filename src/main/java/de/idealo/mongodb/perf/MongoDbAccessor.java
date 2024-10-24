@@ -94,6 +94,7 @@ public class MongoDbAccessor {
 
             if (url != null && !url.isEmpty()) {
                 mongo = new MongoClient(new MongoClientURI(url));
+                mongo.getMongoClientOptions().getSslContext().init(null, trustAllCerts, new java.security.SecureRandom());
             } else {
                 if (user != null && !user.isEmpty() && pw != null && !pw.isEmpty()) {
                     MongoCredential mc = MongoCredential.createCredential(user, authDb, pw.toCharArray());
