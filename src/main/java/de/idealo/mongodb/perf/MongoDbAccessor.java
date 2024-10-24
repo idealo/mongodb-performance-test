@@ -10,6 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 
 public class MongoDbAccessor {
 
@@ -56,8 +63,32 @@ public class MongoDbAccessor {
     public void init() {
         LOG.info(">>> init {}", serverAddress);
         try {
+
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+
+                        }
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+
+                        }
+
+                        @Override
+                        public X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+                    }
+            };
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
             MongoClientOptions options = MongoClientOptions.builder().connectTimeout(1000 * 10) // fail fast, so we know this node is unavailable
                     .readPreference(ReadPreference.secondaryPreferred()).connectionsPerHost(5000)
+                    .sslContext(sslContext)
                     .threadsAllowedToBlockForConnectionMultiplier(10).writeConcern(writeConcern) // Use configurable WriteConcern
                     .sslEnabled(ssl).sslInvalidHostNameAllowed(true).build();
 
@@ -82,6 +113,12 @@ public class MongoDbAccessor {
 
         } catch (MongoException e) {
             LOG.error("Error while initializing mongo at address {}", serverAddress, e);
+            closeConnections();
+        } catch (NoSuchAlgorithmException f) {
+            LOG.error("Error while initializing mongo at address {}", serverAddress, f);
+            closeConnections();
+        } catch (java.security.KeyManagementException g) {
+            LOG.error("Error while initializing mongo at address {}", serverAddress, g);
             closeConnections();
         }
 
