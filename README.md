@@ -1,4 +1,8 @@
-# MongoDB performance test tool
+# ⚠️ Deprecated
+
+This repository is no longer actively maintained. Please use [mongo-bench](https://github.com/idealo/mongodb-benchmarking), a modern, Golang-based MongoDB benchmarking tool that replaces and improves upon this project's functionality.
+
+## MongoDB performance test tool
 
 This java application tests mongoDB performance, such as latency and throughput, by running one or more threads executing either all the same or different database operations, such as Inserts, Updates, Deletes, Counts or Finds until a defined number of operations is executed or a defined maximum runtime is reached.
 
